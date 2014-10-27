@@ -86,9 +86,9 @@
                 Choose a mode:
             </p>
 
-                <button type="button" class="btn btn-default" id="btn-scatter">Scatter</button>
-                <button type="button" class="btn btn-default" id="btn-tweets">Tweets</button>
-                <button type="button" class="btn btn-default" id="btn-heatmap">HeatMap</button>
+            <button type="button" class="btn btn-default" id="btn-scatter">Scatter</button>
+            <button type="button" class="btn btn-default" id="btn-tweets">Tweets</button>
+            <button type="button" class="btn btn-default" id="btn-heatmap">HeatMap</button>
 
             <p>
                 <br/>
@@ -140,6 +140,7 @@
 </script>
 <script type="text/javascript">
     var map, heatmap;
+    var markers = [];
     var mapOptions = {
         center: new google.maps.LatLng(20, 10),
         zoom: 2,
@@ -149,24 +150,33 @@
             mapOptions);
 </script>
 <script>
+
+    var circle = {
+        path: google.maps.SymbolPath.CIRCLE,
+        fillColor: 'blue',
+        fillOpacity: 1,
+        scale: 1,
+        strokeColor: 'blue',
+        strokeWeight: 1
+    };
+
+    function addMarker(location) {
+        var marker = new google.maps.Marker({
+            position: location,
+            icon: circle,
+            draggable: false,
+            map: map
+        });
+        markers.push(marker);
+    }
+
+
     function displayScatter(msg) {
+        clearMap();
         for (var i = 0; i < msg.length; i++) {
             var point = msg[i];
             var myLatlng = new google.maps.LatLng(point['coor2'], point['coor1']);
-            var circle ={
-            	    path: google.maps.SymbolPath.CIRCLE,
-            	    fillColor: 'blue',
-            	    fillOpacity: 1,
-            	    scale: 1,
-            	    strokeColor: 'blue',
-            	    strokeWeight: 1
-            	};
-            var marker = new google.maps.Marker({
-    		    position: myLatlng,
-    		    icon: circle,
-    		    draggable: false,
-    		    map: map
-    		  });
+            addMarker(myLatlng);
         }
     }
 
@@ -190,8 +200,12 @@
     }
 
     function clearMap() {
-    	if (heatmap != null)
-        	heatmap.setMap(null);
+        if (heatmap != null)
+            heatmap.setMap(null);
+        for (var i = 0; i < markers.length; i++) {
+            markers[i].setMap(null);
+            markers = [];
+        }
     }
 
     function getData(func) {

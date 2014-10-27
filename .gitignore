@@ -13,3 +13,4 @@ hs_err_pid*
 
 AwsCredentials.properties
 .DS_Store
+pass.ini

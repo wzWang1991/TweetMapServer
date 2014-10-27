@@ -1,8 +1,14 @@
 
 
+import java.io.BufferedReader;
+import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.FileReader;
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.PrintWriter;
 import java.util.List;
+import java.util.Scanner;
 
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServlet;
@@ -44,13 +50,9 @@ public class getpoints extends HttpServlet {
 		PrintWriter out = response.getWriter();
 		List<SelectResult> list = null;
 		try {
-			SimpleDB.init(new PropertiesCredentials(Thread.currentThread().getContextClassLoader().getResourceAsStream("AwsCredentials.properties")));
-		} catch (Exception e1) {
-			// TODO Auto-generated catch block
-			e1.printStackTrace();
-		}
-		try {
-			list = SimpleDB.selectFromTimeRange(keyword, startTime, endTime);
+			if (rds.conn == null)
+				rds.init(readPass());
+			list = rds.select(keyword, startTime, endTime);
 		} catch (Exception e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
@@ -58,6 +60,13 @@ public class getpoints extends HttpServlet {
 		Gson gson = new Gson();
         out.print(gson.toJson(list));
         out.flush();
+	}
+	
+	private String readPass() {
+		InputStream password = Thread.currentThread().getContextClassLoader().getResourceAsStream("pass.ini");
+        String pass = null;
+        pass = new Scanner(password,"UTF-8").useDelimiter("\\A").next();
+        return pass;
 	}
 
 }
