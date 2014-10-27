@@ -19,4 +19,14 @@
     <servlet-name>HelloWorld</servlet-name>
     <url-pattern>/HelloWorld</url-pattern>
   </servlet-mapping>
+  <servlet>
+    <description></description>
+    <display-name>getpoints</display-name>
+    <servlet-name>getpoints</servlet-name>
+    <servlet-class>getpoints</servlet-class>
+  </servlet>
+  <servlet-mapping>
+    <servlet-name>getpoints</servlet-name>
+    <url-pattern>/getpoints</url-pattern>
+  </servlet-mapping>
 </web-app>

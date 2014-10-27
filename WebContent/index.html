@@ -141,9 +141,6 @@
 
 
     // add a marker in the given location, attach some popup content to it and open the popup
-    for (var i = 0; i < 3; i++) {
-        L.marker(co[i]).addTo(map);
-    }
     L.marker([41.103898, -85.030969]).addTo(map);
 
 </script>
@@ -153,6 +150,18 @@
             var basicValues = $("#slider").rangeSlider("values");
             alert(basicValues.min + " " + basicValues.max);
         });
+        $.ajax({
+        	   type: "POST",
+        	   url: "getpoints",
+        	   data: {"keyword":"John","start":"Boston", "end":"hehe"},
+        	   success: function(msg){
+        	     alert( "Data Saved: " + msg );
+        	   },
+        	   error: function() {
+        		   alert("error!");
+        	   }
+        	});
+        
     });
 </script>
 </body>
