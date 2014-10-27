@@ -49,9 +49,8 @@ public class getpoints extends HttpServlet {
 			// TODO Auto-generated catch block
 			e1.printStackTrace();
 		}
-		
 		try {
-			list = SimpleDB.selectFromTimeRange("movie", "0", "1414347967000");
+			list = SimpleDB.selectFromTimeRange(keyword, startTime, endTime);
 		} catch (Exception e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();

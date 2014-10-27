@@ -1,4 +1,3 @@
-
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -46,7 +45,8 @@
                 <li><a href="#about">About</a></li>
 
             </ul>
-        </div><!--/.nav-collapse -->
+        </div>
+        <!--/.nav-collapse -->
     </div>
 </div>
 
@@ -55,12 +55,15 @@
     <!-- Main component for a primary marketing message or call to action -->
     <div class="jumbotron">
         <h1>TweetMap</h1>
+
         <p>This app shows the coordinates of Tweets and the heatmap of them.</p>
         <a class="btn btn-lg btn-primary" href="../../components/#navbar" role="button">Codes on Github &raquo;</a>
     </div>
 
     <div class="row" id="sliderconainer">
-        <div class="col-md-11">Pick a time range:<div id="slider"></div></div>
+        <div class="col-md-11">Pick a time range:
+            <div id="slider"></div>
+        </div>
         <div id="rangebuttoncontainer">
             <button type="submit" class="btn btn-primary" id="rangebutton">Choose</button>
         </div>
@@ -71,26 +74,27 @@
             <p>
                 Key word:
             </p>
-            <select class="form-control">
+            <select class="form-control" id="sel-keywords">
                 <option>movie</option>
                 <option>soccer</option>
                 <option>party</option>
                 <option>food</option>
             </select>
             <br/>
+
             <p>
                 Choose a mode:
             </p>
-            <div class="btn-group">
-                <button type="button" class="btn btn-default">Scatter</button>
-                <button type="button" class="btn btn-default">Tweets</button>
-                <button type="button" class="btn btn-default">HeatMap</button>
-            </div>
+
+                <button type="button" class="btn btn-default" id="btn-scatter">Scatter</button>
+                <button type="button" class="btn btn-default" id="btn-tweets">Tweets</button>
+                <button type="button" class="btn btn-default" id="btn-heatmap">HeatMap</button>
 
             <p>
                 <br/>
                 Description:
             </p>
+
             <div class="well">Description for each mode.</div>
         </div>
         <div class="col-md-9">
@@ -100,9 +104,11 @@
 
     <footer>
         <p></p>
+
         <p>&copy; Cloud Computing and Big Data</p>
     </footer>
-</div> <!-- /container -->
+</div>
+<!-- /container -->
 
 
 <!-- Bootstrap core JavaScript
@@ -119,21 +125,21 @@
         return now.toLocaleString();
     }
     $("#slider").rangeSlider({
-        bounds: {min: 1414126926, max: 1414213326},
-        formatter:function(val){
+        bounds: {min: 1414126926, max: 1414347967},
+        formatter: function (val) {
             return unix_to_datetime(val);
         },
-        defaultValues:{min: 1414155726, max: 1414184526},
+        defaultValues: {min: 1414155726, max: 1414184526},
         step: 1
     });
 </script>
 
 <script src="dist/js/bootstrap.min.js"></script>
 <script type="text/javascript"
-        src="http://maps.googleapis.com/maps/api/js?key=AIzaSyDayRarZl_9rrBq09-O0P1brolBUOLRAoA&sensor=TRUE">
+        src="http://maps.googleapis.com/maps/api/js?key=AIzaSyDayRarZl_9rrBq09-O0P1brolBUOLRAoA&sensor=TRUE&libraries=visualization">
 </script>
 <script type="text/javascript">
-    var map;
+    var map, heatmap;
     var mapOptions = {
         center: new google.maps.LatLng(20, 10),
         zoom: 2,
@@ -143,32 +149,82 @@
             mapOptions);
 </script>
 <script>
-    $(document).ready(function (){
-        $('#rangebutton').click(function (){
-            //var basicValues = $("#slider").rangeSlider("values");
-            //alert(basicValues.min + " " + basicValues.max);
-            $.ajax({
-         	   type: "POST",
-         	   url: "getpoints",
-         	   data: {"keyword":"John","start":"Boston", "end":"hehe"},
-         	   success: function(msg){
-         		   for (var i = 0; i < msg.length; i++) {
-         			   var point = msg[i];
-                       var myLatlng = new google.maps.LatLng(point['coor2'], point['coor1']);
-                       var marker = new google.maps.Marker({
-                           position: myLatlng,
-                           map: map,
-                           //title: 'Hello World!'
-                       });
-         		   }
-         	   },
-         	   error: function() {
-         		   alert("error!");
-         	   }
-         	});
-         
+    function displayScatter(msg) {
+        for (var i = 0; i < msg.length; i++) {
+            var point = msg[i];
+            var myLatlng = new google.maps.LatLng(point['coor2'], point['coor1']);
+            var circle ={
+            	    path: google.maps.SymbolPath.CIRCLE,
+            	    fillColor: 'blue',
+            	    fillOpacity: 1,
+            	    scale: 1,
+            	    strokeColor: 'blue',
+            	    strokeWeight: 1
+            	};
+            var marker = new google.maps.Marker({
+    		    position: myLatlng,
+    		    icon: circle,
+    		    draggable: false,
+    		    map: map
+    		  });
+        }
+    }
+
+    function displayTweet(msg) {
+
+    }
+
+    function displayHeatMap(msg) {
+        clearMap();
+        var tweetPoints = [];
+        for (var i = 0; i < msg.length; i++) {
+            var point = msg[i];
+            var myLatlng = new google.maps.LatLng(point['coor2'], point['coor1']);
+            tweetPoints.push(myLatlng);
+        }
+        var pointArray = new google.maps.MVCArray(tweetPoints);
+        heatmap = new google.maps.visualization.HeatmapLayer({
+            data: pointArray
         });
-        
+        heatmap.setMap(map);
+    }
+
+    function clearMap() {
+    	if (heatmap != null)
+        	heatmap.setMap(null);
+    }
+
+    function getData(func) {
+        var keyword = $('#sel-keywords').val();
+        var min = $("#slider").rangeSlider("min").toString();
+        var max = $("#slider").rangeSlider("max").toString();
+        $.ajax({
+            type: "POST",
+            url: "getpoints",
+            data: {"keyword": keyword, "start": min.concat("000"), "end": max.concat("000")},
+            success: function (msg) {
+                func(msg);
+            },
+            error: function () {
+                alert("There is something wrong with the server.");
+            }
+        });
+    }
+
+    $(document).ready(function () {
+        $('#btn-scatter').click(function () {
+            var msg = getData(displayScatter);
+        });
+
+        $('#btn-tweets').click(function () {
+            var msg = getData(displayTweet);
+
+        });
+
+        $('#btn-heatmap').click(function () {
+            var msg = getData(displayHeatMap);
+        });
+
     });
 </script>
 </body>
