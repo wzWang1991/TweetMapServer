@@ -94,7 +94,7 @@
             <div class="well">Description for each mode.</div>
         </div>
         <div class="col-md-9">
-            <div id="map"></div>
+            <div id="map_canvas"></div>
         </div>
     </div>
 
@@ -129,38 +129,45 @@
 </script>
 
 <script src="dist/js/bootstrap.min.js"></script>
-<script src="http://cdn.leafletjs.com/leaflet-0.7.3/leaflet.js"></script>
-<script src="http://leaflet.github.io/Leaflet.heat/dist/leaflet-heat.js"></script>
-<script>
-    var map = L.map('map').setView([20, 10], 2);
-    // add an OpenStreetMap tile layer
-    L.tileLayer('http://{s}.mqcdn.com/tiles/1.0.0/map/{z}/{x}/{y}.png', {
-        attribution: '&copy; <a href="http://osm.org/copyright" title="OpenStreetMap" target="_blank">OpenStreetMap</a> contributors | Tiles Courtesy of <a href="http://www.mapquest.com/" title="MapQuest" target="_blank">MapQuest</a> <img src="http://developer.mapquest.com/content/osm/mq_logo.png" width="16" height="16">',
-        subdomains: ['otile1', 'otile2', 'otile3', 'otile4']
-    }).addTo(map);
-
-
-    // add a marker in the given location, attach some popup content to it and open the popup
-    L.marker([41.103898, -85.030969]).addTo(map);
-
+<script type="text/javascript"
+        src="http://maps.googleapis.com/maps/api/js?key=AIzaSyDayRarZl_9rrBq09-O0P1brolBUOLRAoA&sensor=TRUE">
+</script>
+<script type="text/javascript">
+    var map;
+    var mapOptions = {
+        center: new google.maps.LatLng(20, 10),
+        zoom: 2,
+        mapTypeId: google.maps.MapTypeId.ROADMAP
+    };
+    map = new google.maps.Map(document.getElementById("map_canvas"),
+            mapOptions);
 </script>
 <script>
     $(document).ready(function (){
         $('#rangebutton').click(function (){
-            var basicValues = $("#slider").rangeSlider("values");
-            alert(basicValues.min + " " + basicValues.max);
+            //var basicValues = $("#slider").rangeSlider("values");
+            //alert(basicValues.min + " " + basicValues.max);
+            $.ajax({
+         	   type: "POST",
+         	   url: "getpoints",
+         	   data: {"keyword":"John","start":"Boston", "end":"hehe"},
+         	   success: function(msg){
+         		   for (var i = 0; i < msg.length; i++) {
+         			   var point = msg[i];
+                       var myLatlng = new google.maps.LatLng(point['coor2'], point['coor1']);
+                       var marker = new google.maps.Marker({
+                           position: myLatlng,
+                           map: map,
+                           //title: 'Hello World!'
+                       });
+         		   }
+         	   },
+         	   error: function() {
+         		   alert("error!");
+         	   }
+         	});
+         
         });
-        $.ajax({
-        	   type: "POST",
-        	   url: "getpoints",
-        	   data: {"keyword":"John","start":"Boston", "end":"hehe"},
-        	   success: function(msg){
-        	     alert( "Data Saved: " + msg );
-        	   },
-        	   error: function() {
-        		   alert("error!");
-        	   }
-        	});
         
     });
 </script>

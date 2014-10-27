@@ -8,6 +8,7 @@ import java.io.InputStreamReader;
 import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.UUID;
 
@@ -47,14 +48,13 @@ import com.google.gson.Gson;
 public class SimpleDB {
     static AmazonSimpleDB sdb;
     static AmazonS3 s3;
-    static String bucket = "text-test-" + UUID.randomUUID();;
+    static String bucket = "text-test-" + UUID.randomUUID();
+    static AWSCredentials credentials = null;
 
-    private static void init() throws Exception {
+    public static void init(PropertiesCredentials p) throws Exception {
 
-        AWSCredentials credentials = null;
         try {
-        	FileInputStream fs = new FileInputStream("AwsCredentials.properties");
-            credentials = new PropertiesCredentials(fs);
+            credentials = p;
         } catch (Exception e) {
             throw new AmazonClientException(
                     "Cannot load the credentials from the credential profiles file. " +
@@ -289,8 +289,8 @@ public class SimpleDB {
         System.out.println("total number of items " + count);
     }
 
-    private static String selectFromTimeRange(String table, String start, String end){
-        StringBuilder sb = new StringBuilder();
+    public static List<SelectResult> selectFromTimeRange(String table, String start, String end) throws Exception{
+        List<SelectResult> list = new LinkedList<SelectResult>();
 
         String selectExpression = "select * from `" + table + "` where created_at > '"+start+"' and created_at < '"+end+"'";
         System.out.println(selectExpression);
@@ -335,9 +335,7 @@ public class SimpleDB {
                     }
                 }
 
-                String s = gson.toJson(sr);
-                sb.append(s);
-                sb.append("\n");
+                list.add(sr);
             }
 
             if (next!=null) {
@@ -352,7 +350,7 @@ public class SimpleDB {
 
         System.out.println("total number of items " + count);
 
-        return sb.toString();
+        return list;
     }
 
     private static void insertAll() throws Exception {
@@ -387,7 +385,7 @@ public class SimpleDB {
     }
 
     public static void main(String[] args) throws Exception {
-        init();
+        //init();
 
         // show tables with item count
 //    	listDomains();
@@ -396,7 +394,7 @@ public class SimpleDB {
 //    	insertAll();
 
         // example usage
-        System.out.println(selectFromTimeRange("movie", "0", "1414347967000"));
+        System.out.println(selectFromTimeRange("movie", "0", "1414347967000").size());
 
     }
 }

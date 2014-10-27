@@ -2,11 +2,15 @@
 
 import java.io.IOException;
 import java.io.PrintWriter;
+import java.util.List;
 
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+
+import com.amazonaws.auth.PropertiesCredentials;
+import com.google.gson.Gson;
 
 /**
  * Servlet implementation class getpoints
@@ -36,9 +40,25 @@ public class getpoints extends HttpServlet {
 		String keyword = request.getParameter("keyword");
 		String startTime = request.getParameter("start");
 		String endTime = request.getParameter("end");
-		response.setContentType("text/html");
+		response.setContentType("application/json");
 		PrintWriter out = response.getWriter();
-        out.println(keyword + " " + startTime + " " + endTime);
+		List<SelectResult> list = null;
+		try {
+			SimpleDB.init(new PropertiesCredentials(Thread.currentThread().getContextClassLoader().getResourceAsStream("AwsCredentials.properties")));
+		} catch (Exception e1) {
+			// TODO Auto-generated catch block
+			e1.printStackTrace();
+		}
+		
+		try {
+			list = SimpleDB.selectFromTimeRange("movie", "0", "1414347967000");
+		} catch (Exception e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		Gson gson = new Gson();
+        out.print(gson.toJson(list));
+        out.flush();
 	}
 
 }
