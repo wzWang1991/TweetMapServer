@@ -1,0 +1,159 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="description" content="">
+    <meta name="author" content="">
+
+    <title>TweetMap</title>
+
+    <!-- Bootstrap core CSS -->
+    <link href="dist/css/bootstrap.min.css" rel="stylesheet">
+
+    <!-- Custom styles for this template -->
+    <link href="dist/css/custom.css" rel="stylesheet">
+    <link rel="stylesheet" href="http://cdn.leafletjs.com/leaflet-0.7.3/leaflet.css"/>
+    <link rel="stylesheet" href="dist/css/iThing-min.css"/>
+
+
+    <!-- HTML5 shim and Respond.js IE8 support of HTML5 elements and media queries -->
+    <!--[if lt IE 9]>
+    <script src="https://oss.maxcdn.com/html5shiv/3.7.2/html5shiv.min.js"></script>
+    <script src="https://oss.maxcdn.com/respond/1.4.2/respond.min.js"></script>
+    <![endif]-->
+</head>
+
+<body>
+
+<!-- Fixed navbar -->
+<div class="navbar navbar-default navbar-fixed-top" role="navigation">
+    <div class="container">
+        <div class="navbar-header">
+            <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target=".navbar-collapse">
+                <span class="sr-only">Toggle navigation</span>
+                <span class="icon-bar"></span>
+                <span class="icon-bar"></span>
+                <span class="icon-bar"></span>
+            </button>
+            <a class="navbar-brand" href="#">TweetMap</a>
+        </div>
+        <div class="navbar-collapse collapse">
+            <ul class="nav navbar-nav">
+                <li class="active"><a href="#">Home</a></li>
+                <li><a href="#about">About</a></li>
+
+            </ul>
+        </div><!--/.nav-collapse -->
+    </div>
+</div>
+
+<div class="container">
+
+    <!-- Main component for a primary marketing message or call to action -->
+    <div class="jumbotron">
+        <h1>TweetMap</h1>
+        <p>This app shows the coordinates of Tweets and the heatmap of them.</p>
+        <a class="btn btn-lg btn-primary" href="../../components/#navbar" role="button">Codes on Github &raquo;</a>
+    </div>
+
+    <div class="row" id="sliderconainer">
+        <div class="col-md-11">Pick a time range:<div id="slider"></div></div>
+        <div id="rangebuttoncontainer">
+            <button type="submit" class="btn btn-primary" id="rangebutton">Choose</button>
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="col-md-3">
+            <p>
+                Key word:
+            </p>
+            <select class="form-control">
+                <option>movie</option>
+                <option>soccer</option>
+                <option>party</option>
+                <option>food</option>
+            </select>
+            <br/>
+            <p>
+                Choose a mode:
+            </p>
+            <div class="btn-group">
+                <button type="button" class="btn btn-default">Scatter</button>
+                <button type="button" class="btn btn-default">Tweets</button>
+                <button type="button" class="btn btn-default">HeatMap</button>
+            </div>
+
+            <p>
+                <br/>
+                Description:
+            </p>
+            <div class="well">Description for each mode.</div>
+        </div>
+        <div class="col-md-9">
+            <div id="map"></div>
+        </div>
+    </div>
+
+    <footer>
+        <p></p>
+        <p>&copy; Cloud Computing and Big Data</p>
+    </footer>
+</div> <!-- /container -->
+
+
+<!-- Bootstrap core JavaScript
+================================================== -->
+<!-- Placed at the end of the document so the pages load faster -->
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.1/jquery.min.js"></script>
+<script src="http://code.jquery.com/ui/1.10.3/jquery-ui.min.js"></script>
+
+<script src="dist/js/jQRangeSlider-min.js"></script>
+
+<script>
+    function unix_to_datetime(unix) {
+        var now = new Date(parseInt(unix) * 1000);
+        return now.toLocaleString();
+    }
+    $("#slider").rangeSlider({
+        bounds: {min: 1414126926, max: 1414213326},
+        formatter:function(val){
+            return unix_to_datetime(val);
+        },
+        defaultValues:{min: 1414155726, max: 1414184526},
+        step: 1
+    });
+</script>
+
+<script src="dist/js/bootstrap.min.js"></script>
+<script src="http://cdn.leafletjs.com/leaflet-0.7.3/leaflet.js"></script>
+<script src="http://leaflet.github.io/Leaflet.heat/dist/leaflet-heat.js"></script>
+<script>
+    var map = L.map('map').setView([20, 10], 2);
+    // add an OpenStreetMap tile layer
+    L.tileLayer('http://{s}.mqcdn.com/tiles/1.0.0/map/{z}/{x}/{y}.png', {
+        attribution: '&copy; <a href="http://osm.org/copyright" title="OpenStreetMap" target="_blank">OpenStreetMap</a> contributors | Tiles Courtesy of <a href="http://www.mapquest.com/" title="MapQuest" target="_blank">MapQuest</a> <img src="http://developer.mapquest.com/content/osm/mq_logo.png" width="16" height="16">',
+        subdomains: ['otile1', 'otile2', 'otile3', 'otile4']
+    }).addTo(map);
+
+
+    // add a marker in the given location, attach some popup content to it and open the popup
+    for (var i = 0; i < 3; i++) {
+        L.marker(co[i]).addTo(map);
+    }
+    L.marker([41.103898, -85.030969]).addTo(map);
+
+</script>
+<script>
+    $(document).ready(function (){
+        $('#rangebutton').click(function (){
+            var basicValues = $("#slider").rangeSlider("values");
+            alert(basicValues.min + " " + basicValues.max);
+        });
+    });
+</script>
+</body>
+</html>
