@@ -56,16 +56,19 @@
     <div class="jumbotron">
         <h1>TweetMap</h1>
 
-        <p>This app shows the coordinates of Tweets and the heatmap of them.</p>
+        <p>This app shows the coordinates of Tweets and the heatmap of them. It supports Real Time Mode, in which mode you can see the latest tweets.</p>
         <a class="btn btn-lg btn-primary" href="../../components/#navbar" role="button">Codes on Github &raquo;</a>
     </div>
 
     <div class="row" id="sliderconainer">
-        <div class="col-md-11">Pick a time range:
+        <div class="col-md-10">Pick a time range:
             <div id="slider"></div>
         </div>
         <div id="rangebuttoncontainer">
-            <button type="submit" class="btn btn-primary" id="rangebutton">Choose</button>
+            <button type="submit" class="btn btn-primary" data-toggle="modal" data-target="#myModal" id="btn-realtime">
+                Switch to Real Time Mode
+            </button>
+            <button type="submit" class="btn btn-danger" id="btn-exitrealtime">Exit Real Time Mode</button>
         </div>
     </div>
 
@@ -86,9 +89,9 @@
                 Choose a mode:
             </p>
 
-            <button type="button" class="btn btn-default" id="btn-scatter">Scatter</button>
-            <button type="button" class="btn btn-default" id="btn-tweets">Tweets</button>
-            <button type="button" class="btn btn-default" id="btn-heatmap">HeatMap</button>
+            <button type="button" class="btn btn-default btn-modes" id="btn-scatter">Scatter</button>
+            <button type="button" class="btn btn-default btn-modes" id="btn-tweets">Tweets</button>
+            <button type="button" class="btn btn-default btn-modes" id="btn-heatmap">HeatMap</button>
 
             <p>
                 <br/>
@@ -109,6 +112,29 @@
     </footer>
 </div>
 <!-- /container -->
+
+<div class="modal fade" id="myModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal"><span aria-hidden="true">&times;</span><span
+                        class="sr-only">Close</span></button>
+                <h4 class="modal-title" id="myModalLabel">Real Time Mode</h4>
+            </div>
+            <div class="modal-body">
+                <p>You are entering the Real Time Mode. You can click exit button to exit this mode.</p>
+
+                <p>In this mode, the tweets about "food", "movie", "party" and "soccer" which have coordinates will be
+                    shown on the map. </p>
+
+                <p>The tweets shown in this mode will not be saved in the database.</p>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-primary" id="btn-enterrealtime">Go!</button>
+            </div>
+        </div>
+    </div>
+</div>
 
 
 <!-- Bootstrap core JavaScript
@@ -181,8 +207,25 @@
         var infowindow = new google.maps.InfoWindow({
             content: text
         });
-        google.maps.event.addListener(marker, 'click', function() {
-            infowindow.open(map,marker);
+        google.maps.event.addListener(marker, 'click', function () {
+            infowindow.open(map, marker);
+        });
+    }
+
+    function addRealTimeTweetMarker(location, text) {
+        var marker = new google.maps.Marker({
+            position: location,
+            draggable: false,
+            animation: google.maps.Animation.DROP,
+            map: map,
+            title: text
+        });
+        markers.push(marker);
+        var infowindow = new google.maps.InfoWindow({
+            content: text
+        });
+        google.maps.event.addListener(marker, 'click', function () {
+            infowindow.open(map, marker);
         });
     }
 
@@ -203,7 +246,6 @@
             var myLatlng = new google.maps.LatLng(point['coor2'], point['coor1']);
             addTweetMarker(myLatlng, point['text']);
         }
-
     }
 
     function displayHeatMap(msg) {
@@ -265,6 +307,60 @@
         });
 
     });
+</script>
+<script>
+    var webSocket = null;
+    var realTimeMode = false;
+    $(document).ready(function () {
+        $('#btn-exitrealtime').hide();
+        $('#btn-enterrealtime').click(function () {
+            clearMap();
+            $('#sel-keywords').prop('disabled', true);
+            $('.btn-modes').prop('disabled', true);
+            $('#slider').rangeSlider("disable");
+            $('#myModal').modal('hide');
+            $('#btn-realtime').hide();
+            $('#btn-exitrealtime').show();
+            connectToServer();
+            $('#description').html("Now you are in Real Time Mode. You can click the markers to see the content of tweet.");
+        });
+        $('#btn-exitrealtime').click(function () {
+            clearMap();
+            $('#sel-keywords').prop('disabled', false);
+            $('.btn-modes').prop('disabled', false);
+            $('#slider').rangeSlider("enable");
+            $('#btn-realtime').show();
+            $('#btn-exitrealtime').hide();
+            webSocket.close();
+            webSocket = null;
+
+        });
+    });
+    function connectToServer() {
+        if (webSocket == null) {
+            var wsServer = 'ws://ec2-54-165-120-34.compute-1.amazonaws.com:11083';
+            webSocket = new WebSocket(wsServer);
+            webSocket.onopen = function () {
+                onOpen();
+            };
+            webSocket.onmessage = function (evt) {
+                onMessage(evt);
+            };
+            webSocket.onerror = function (evt) {
+                webSocket = null;
+            }
+        }
+    }
+    function onOpen() {
+        //alert("open!");
+    }
+    function onMessage(evt) {
+        var msg = JSON.parse(evt.data);
+        var myLatlng = new google.maps.LatLng(msg['coordinates']['coordinates'][1], msg['coordinates']['coordinates'][0]);
+        addRealTimeTweetMarker(myLatlng, msg['text']);
+
+    }
+
 </script>
 </body>
 </html>
