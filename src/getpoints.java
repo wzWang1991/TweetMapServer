@@ -49,8 +49,9 @@ public class getpoints extends HttpServlet {
 		response.setContentType("application/json");
 		PrintWriter out = response.getWriter();
 		List<SelectResult> list = null;
+		Rds rds = Rds.getInstance();
 		try {
-			if (rds.conn == null)
+			while (!rds.isConnected())
 				rds.init(readPass());
 			list = rds.select(keyword, startTime, endTime);
 		} catch (Exception e) {
@@ -65,7 +66,7 @@ public class getpoints extends HttpServlet {
 	private String readPass() {
 		InputStream password = Thread.currentThread().getContextClassLoader().getResourceAsStream("pass.ini");
         String pass = null;
-        pass = new Scanner(password,"UTF-8").useDelimiter("\\A").next();
+        pass = new Scanner(password).next();
         return pass;
 	}
 

@@ -17,63 +17,38 @@ import com.google.gson.Gson;
 
 
 public class Rds {
-    static final String JDBC_DRIVER = "com.mysql.jdbc.Driver";
-    static final String DB_URL = "jdbc:mysql://tweetmap.crsarl5br9bw.us-east-1.rds.amazonaws.com:3306/tweet";
-    static Connection conn = null;
+    final String JDBC_DRIVER = "com.mysql.jdbc.Driver";
+    final String DB_URL = "jdbc:mysql://tweetmap.crsarl5br9bw.us-east-1.rds.amazonaws.com:3306/tweet";
+    Connection conn;
     
-    public static void init(String password) {
+    private static Rds instance = null;
+    private Rds() {
+    	conn = null;
+    }
+    
+    public static Rds getInstance() {
+    	if (instance == null)
+    		instance = new Rds();
+    	return instance;
+    }
+    
+    public boolean isConnected() {
+    	return conn != null;
+    }
+    
+    public void init(String password) {
         try {
-            Class.forName("com.mysql.jdbc.Driver");
-            System.out.println("Connecting to database...");
-            conn = DriverManager.getConnection(DB_URL, "xiaojing", password);
+        	if (conn == null) {
+                Class.forName(JDBC_DRIVER);
+                System.out.println("Connecting to database...");
+                conn = DriverManager.getConnection(DB_URL, "xiaojing", password);
+        	}
         } catch (Exception e) {
         	e.printStackTrace();
         }
     }
     
-    
-
-    public static void main(String[] args) {
-        File password = new File("pass.txt");
-        String pass = null;
-        BufferedReader br;
-
-        try {
-            br = new BufferedReader(new FileReader(password));
-            pass = br.readLine();
-        } catch (FileNotFoundException e1) {
-            // TODO Auto-generated catch block
-            e1.printStackTrace();
-        } catch (IOException e) {
-            // TODO Auto-generated catch block
-            e.printStackTrace();
-        }
-
-        Statement stmt = null;
-
-        try {
-            Class.forName("com.mysql.jdbc.Driver");
-
-            System.out.println("Connecting to database...");
-            conn = DriverManager.getConnection(DB_URL, "xiaojing", pass);
-
-            // example
-//		    createTable("party");
-//		    insert("party.txt", "party");
-
-            select("party", "0", "1414347967000");
-
-            conn.close();
-        } catch (SQLException e) {
-            // TODO Auto-generated catch block
-            e.printStackTrace();
-        } catch (ClassNotFoundException e) {
-            // TODO Auto-generated catch block
-            e.printStackTrace();
-        }
-    }
-
-    private static void createTable(String name) {
+    private void createTable(String name) {
         System.out.println("Creating table in given database...");
         Statement stmt;
         try {
@@ -95,7 +70,7 @@ public class Rds {
 
     }
 
-    private static void deleteTable(String name) {
+    private void deleteTable(String name) {
         System.out.println("Deleting table in given database...");
         Statement stmt;
         try {
@@ -113,7 +88,7 @@ public class Rds {
 
     static HashMap<String, String> map = new HashMap<String, String>();
 
-    private static void createMap() {
+    private void createMap() {
         map.put("Jan", "01");
         map.put("Feb", "02");
         map.put("Mar", "03");
@@ -128,7 +103,7 @@ public class Rds {
         map.put("Dec", "12");
     }
 
-    private static String convertTime(String date) {
+    private String convertTime(String date) {
         String processed = null;
 
         if(map.size()==0){
@@ -147,7 +122,7 @@ public class Rds {
         return String.valueOf(timestamp.getTime());
     }
 
-    public static List<SelectResult> select(String table, String start, String end) {
+    public List<SelectResult> select(String table, String start, String end) {
         String sql = "SELECT * FROM "+table+" WHERE created_at < '"+end+"' AND created_at > '"+start+"'";
 //    	String selectExpression = "select * from " + table + " where created_at > '"+start+"' and created_at < '"+end+"'";
         StringBuilder sb = new StringBuilder();
@@ -187,7 +162,7 @@ public class Rds {
 
     }
 
-    private static void insert(String file, String table) {
+    private void insert(String file, String table) {
         System.out.println("Inserting into table " +table );
         Statement stmt;
         BufferedReader br;
