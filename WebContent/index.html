@@ -95,7 +95,7 @@
                 Description:
             </p>
 
-            <div class="well">Description for each mode.</div>
+            <div class="well" id="description">Description for each mode.</div>
         </div>
         <div class="col-md-9">
             <div id="map_canvas"></div>
@@ -125,11 +125,11 @@
         return now.toLocaleString();
     }
     $("#slider").rangeSlider({
-        bounds: {min: 1414126926, max: 1414347967},
+        bounds: {min: 1414267917, max: 1414351381},
         formatter: function (val) {
             return unix_to_datetime(val);
         },
-        defaultValues: {min: 1414155726, max: 1414184526},
+        defaultValues: {min: 1414295738, max: 1414324404},
         step: 1
     });
 </script>
@@ -170,6 +170,22 @@
         markers.push(marker);
     }
 
+    function addTweetMarker(location, text) {
+        var marker = new google.maps.Marker({
+            position: location,
+            draggable: false,
+            map: map,
+            title: text
+        });
+        markers.push(marker);
+        var infowindow = new google.maps.InfoWindow({
+            content: text
+        });
+        google.maps.event.addListener(marker, 'click', function() {
+            infowindow.open(map,marker);
+        });
+    }
+
 
     function displayScatter(msg) {
         clearMap();
@@ -181,6 +197,12 @@
     }
 
     function displayTweet(msg) {
+        clearMap();
+        for (var i = 0; i < msg.length; i++) {
+            var point = msg[i];
+            var myLatlng = new google.maps.LatLng(point['coor2'], point['coor1']);
+            addTweetMarker(myLatlng, point['text']);
+        }
 
     }
 
@@ -204,8 +226,8 @@
             heatmap.setMap(null);
         for (var i = 0; i < markers.length; i++) {
             markers[i].setMap(null);
-            markers = [];
         }
+        markers = [];
     }
 
     function getData(func) {
@@ -227,16 +249,19 @@
 
     $(document).ready(function () {
         $('#btn-scatter').click(function () {
-            var msg = getData(displayScatter);
+            getData(displayScatter);
+            $('#description').html("This is the scatter view of tweets in this period.");
         });
 
         $('#btn-tweets').click(function () {
-            var msg = getData(displayTweet);
+            getData(displayTweet);
+            $('#description').html("You can click the markers to see the detail tweet.");
 
         });
 
         $('#btn-heatmap').click(function () {
-            var msg = getData(displayHeatMap);
+            getData(displayHeatMap);
+            $('#description').html("This is the heat map of tweets in this period.");
         });
 
     });
