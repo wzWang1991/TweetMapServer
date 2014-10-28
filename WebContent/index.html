@@ -14,7 +14,6 @@
 
     <!-- Custom styles for this template -->
     <link href="dist/css/custom.css" rel="stylesheet">
-    <link rel="stylesheet" href="http://cdn.leafletjs.com/leaflet-0.7.3/leaflet.css"/>
     <link rel="stylesheet" href="dist/css/iThing-min.css"/>
 
 
@@ -100,8 +99,13 @@
 
             <div class="well" id="description">Description for each mode.</div>
         </div>
-        <div class="col-md-9">
-            <div id="map_canvas"></div>
+        <div class="col-md-9" id="foo">
+        <div id="loading">
+            <div id="spinner"></div>
+            <div id="spinnercover"></div>
+            </div>
+                <div id="map_canvas"></div>
+
         </div>
     </div>
 
@@ -164,6 +168,7 @@
 <script type="text/javascript"
         src="http://maps.googleapis.com/maps/api/js?key=AIzaSyDayRarZl_9rrBq09-O0P1brolBUOLRAoA&sensor=TRUE&libraries=visualization">
 </script>
+<script src="http://fgnass.github.io/spin.js/spin.min.js"></script>
 <script type="text/javascript">
     var map, heatmap;
     var markers = [];
@@ -279,14 +284,25 @@
         $.ajax({
             type: "POST",
             url: "getpoints",
+            beforeSend: showLoading,
             data: {"keyword": keyword, "start": min.concat("000"), "end": max.concat("000")},
             success: function (msg) {
+                hideLoading();
                 func(msg);
             },
             error: function () {
                 alert("There is something wrong with the server.");
             }
         });
+    }
+
+    function showLoading() {
+        $('#loading').show();
+        return true;
+    }
+
+    function hideLoading() {
+        $('#loading').hide();
     }
 
     $(document).ready(function () {
@@ -360,6 +376,30 @@
         addRealTimeTweetMarker(myLatlng, msg['text']);
 
     }
+
+    $(document).ready(function () {
+        var opts = {
+            lines: 13, // The number of lines to draw
+            length: 20, // The length of each line
+            width: 10, // The line thickness
+            radius: 30, // The radius of the inner circle
+            corners: 1, // Corner roundness (0..1)
+            rotate: 19, // The rotation offset
+            direction: 1, // 1: clockwise, -1: counterclockwise
+            color: '#000', // #rgb or #rrggbb or array of colors
+            speed: 1, // Rounds per second
+            trail: 60, // Afterglow percentage
+            shadow: false, // Whether to render a shadow
+            hwaccel: false, // Whether to use hardware acceleration
+            className: 'spinner', // The CSS class to assign to the spinner
+            zIndex: 10000, // The z-index (defaults to 2000000000)
+            top: '50%', // Top position relative to parent
+            left: '50%' // Left position relative to parent
+        };
+        var target = document.getElementById('spinner');
+        var spinner = new Spinner(opts).spin(target);
+    });
+
 
 </script>
 </body>
