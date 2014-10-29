@@ -50,9 +50,9 @@ public class getpoints extends HttpServlet {
 		PrintWriter out = response.getWriter();
 		List<SelectResult> list = null;
 		Rds rds = Rds.getInstance();
+		if (!rds.isPasswordSet())
+			rds.setPassword(readPass());
 		try {
-			while (!rds.isConnected())
-				rds.init(readPass());
 			list = rds.select(keyword, startTime, endTime);
 		} catch (Exception e) {
 			// TODO Auto-generated catch block

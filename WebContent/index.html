@@ -41,8 +41,6 @@
         <div class="navbar-collapse collapse">
             <ul class="nav navbar-nav">
                 <li class="active"><a href="#">Home</a></li>
-                <li><a href="#about">About</a></li>
-
             </ul>
         </div>
         <!--/.nav-collapse -->
@@ -56,7 +54,7 @@
         <h1>TweetMap</h1>
 
         <p>This app shows the coordinates of Tweets and the heatmap of them. It supports Real Time Mode, in which mode you can see the latest tweets.</p>
-        <a class="btn btn-lg btn-primary" href="../../components/#navbar" role="button">Codes on Github &raquo;</a>
+        <a class="btn btn-lg btn-primary" href="https://github.com/wzWang1991/TweetMapServer" role="button">Codes on Github &raquo;</a>
     </div>
 
     <div class="row" id="sliderconainer">
@@ -152,8 +150,16 @@
 <script>
     function unix_to_datetime(unix) {
         var now = new Date(parseInt(unix) * 1000);
-        return now.toLocaleString();
+        var ret = now.getFullYear() + "/" + now.getMonth() + "/" + now.getDate() + " " + toTwoDigit(now.getHours()) + ":" + toTwoDigit(now.getMinutes()) + ":" + toTwoDigit(now.getSeconds());
+        return ret;
     }
+
+    function toTwoDigit(num) {
+        if(num > 9)
+            return num.toString();
+        return "0" + num;
+    }
+
     $("#slider").rangeSlider({
         bounds: {min: 1414267917, max: 1414351381},
         formatter: function (val) {
@@ -328,7 +334,6 @@
     var webSocket = null;
     var realTimeMode = false;
     $(document).ready(function () {
-        $('#btn-exitrealtime').hide();
         $('#btn-enterrealtime').click(function () {
             clearMap();
             $('#sel-keywords').prop('disabled', true);

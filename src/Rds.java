@@ -20,6 +20,7 @@ public class Rds {
     final String JDBC_DRIVER = "com.mysql.jdbc.Driver";
     final String DB_URL = "jdbc:mysql://tweetmap.crsarl5br9bw.us-east-1.rds.amazonaws.com:3306/tweet";
     Connection conn;
+    private String password = null;;
     
     private static Rds instance = null;
     private Rds() {
@@ -36,13 +37,21 @@ public class Rds {
     	return conn != null;
     }
     
-    public void init(String password) {
+    public void setPassword(String password) {
+    	this.password = password;
+    	if (conn == null)
+    		init();
+    }
+    
+    public boolean isPasswordSet() {
+    	return this.password != null;
+    }
+    
+    public void init() {
         try {
-        	if (conn == null) {
-                Class.forName(JDBC_DRIVER);
-                System.out.println("Connecting to database...");
-                conn = DriverManager.getConnection(DB_URL, "xiaojing", password);
-        	}
+            Class.forName(JDBC_DRIVER);
+            System.out.println("Connecting to database...");
+            conn = DriverManager.getConnection(DB_URL, "xiaojing", password);
         } catch (Exception e) {
         	e.printStackTrace();
         }
@@ -129,37 +138,39 @@ public class Rds {
         Statement stmt;
         int count = 0;
         List<SelectResult> list = new LinkedList<SelectResult>();
-        try {
-            stmt = conn.createStatement();
-            ResultSet rs = stmt.executeQuery(sql);
+        while (true) {
+            try {
+                stmt = conn.createStatement();
+                ResultSet rs = stmt.executeQuery(sql);
+                while(rs.next()){
+                    Gson gson = new Gson();
+                    SelectResult sr = new SelectResult(rs.getString("id_str"));
 
-            while(rs.next()){
-                Gson gson = new Gson();
-                SelectResult sr = new SelectResult(rs.getString("id_str"));
+                    String text = rs.getString("text");
+                    String c1 = rs.getString("coor1");
+                    String c2 = rs.getString("coor2");
+                    String time = rs.getString("created_at");
 
-                String text = rs.getString("text");
-                String c1 = rs.getString("coor1");
-                String c2 = rs.getString("coor2");
-                String time = rs.getString("created_at");
+                    sr.setText(text);
+                    sr.setCoor1(c1);
+                    sr.setCoor2(c2);
+                    sr.setTime(time);
 
-                sr.setText(text);
-                sr.setCoor1(c1);
-                sr.setCoor2(c2);
-                sr.setTime(time);
-
-                list.add(sr);
-                count++;
+                    list.add(sr);
+                    count++;
+                }
+                rs.close();
+                stmt.close();
+                break;
+            } catch (Exception e) {
+            	System.err.println("Reconnect to database.");
+            	init();
+                e.printStackTrace();
             }
-
-            rs.close();
-            stmt.close();
-        } catch (SQLException e) {
-            e.printStackTrace();
         }
 
-        System.out.println(count);
+        System.out.println("Total count of tweets:" + count);
         return list;
-
     }
 
     private void insert(String file, String table) {
