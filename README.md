@@ -1,5 +1,9 @@
 TweetMapServer
 ==============
+Weizhen Wang  
+Xiaojing You  
+
+
 ##Overview
 TweetMap is an app that shows the coordinates of Tweets and the heatmap of them. It supports Real Time Mode, in which mode you can see the latest tweets.
 
