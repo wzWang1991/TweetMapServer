@@ -150,7 +150,7 @@
 <script>
     function unix_to_datetime(unix) {
         var now = new Date(parseInt(unix) * 1000);
-        var ret = now.getFullYear() + "/" + now.getMonth() + "/" + now.getDate() + " " + toTwoDigit(now.getHours()) + ":" + toTwoDigit(now.getMinutes()) + ":" + toTwoDigit(now.getSeconds());
+        var ret = now.getFullYear() + "/" + (now.getMonth() + 1) + "/" + now.getDate() + " " + toTwoDigit(now.getHours()) + ":" + toTwoDigit(now.getMinutes()) + ":" + toTwoDigit(now.getSeconds());
         return ret;
     }
 

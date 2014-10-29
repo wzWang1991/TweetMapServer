@@ -27,8 +27,10 @@ Servlet is used to process the post request and return the data in json format.
 ### Real Time Mode Server
 This is a websocket server, on which we also use a com.twitter.hbc to get the stream of tweets. It will send the tweets to all clients that are connecting to the server.
 
+For details, you can visit <https://github.com/wzWang1991/TweetMapRealTimeServer>.
+
 ### Front End
 **Normal Mode**: We use Bootstrap framework to help us build the front end. Google Map is used to display the map and show the markers and heat map. Ajax is used to communicate with servlet.
 
-**Real Time Mode**: We use websocket to communicate with real time mode server. 
+**Real Time Mode**: We use websocket to communicate with real time mode server. When we get a new tweet, we will display it as a marker on the map with animation.
 
